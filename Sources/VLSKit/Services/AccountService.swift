@@ -180,16 +180,23 @@ public struct PaymentInfos: Codable, Sendable {
     public let expiryYear: Int?
 }
 
-/// An alert for an account.
+/// A blocking or informational status on an account, from
+/// `GET .../accounts/{id}/alerts`.
+///
+/// The live shape is `{ value, key, isBlockingStatus }` — for example
+/// `value: "NO_VALID_SUBSCRIPTIONS"` with `isBlockingStatus: true`, which is what stops
+/// an otherwise-signed-in account from renting. Every field is optional so an unexpected
+/// entry still decodes.
 public struct Alert: Codable, Sendable {
-    /// The unique ID of the alert, if present.
-    public let id: UUID?
-    /// The type of the alert, if present.
-    public let type: String?
-    /// The message text of the alert, if present.
-    public let message: String?
-    /// The date and time when the server created the alert, if present.
-    public let createdAt: Date?
+    /// The status code, for example `NO_VALID_SUBSCRIPTIONS`. The full set is unknown.
+    public let value: String?
+    /// A secondary key the backend attaches to some alerts.
+    public let key: String?
+    /// True when this status blocks the account from riding.
+    public let isBlockingStatus: Bool?
+
+    /// True when this alert blocks riding.
+    public var isBlocking: Bool { isBlockingStatus ?? false }
 }
 
 /// The CGAU (terms and conditions) validation status for an account.

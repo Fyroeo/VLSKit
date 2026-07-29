@@ -77,6 +77,24 @@ public struct Bike: Codable, Sendable, Identifiable {
     /// separate battery from the electric propulsion battery in `battery`.
     public let bikeBatteryMv: Int?
 
+    // MARK: - Reservation and service history (vnd.bikes.v4)
+
+    /// True if the bike is currently held by a booking. Present on `v4`; `nil` on the
+    /// older `v3` payload.
+    public let isReserved: Bool?
+    /// Backend-defined energy-source code. Only `0` has been observed. `nil` on `v3`.
+    public let energySource: Int?
+    /// Time of the bike's last completed trip, if the server reported one.
+    public let lastTripDateTime: Date?
+    /// Time of the bike's last field control, if any.
+    public let lastControlDateTime: Date?
+    /// Time of the bike's last workshop revision, if any.
+    public let lastRevisionDateTime: Date?
+    /// When the bike is next due for a workshop revision.
+    public let nextReview: Date?
+    /// When the bike is next due for a field control.
+    public let nextCheck: Date?
+
     // MARK: - Nested types
 
     /// Current status of a bike.

@@ -31,6 +31,9 @@ public struct BikeDetailClient: Sendable {
     /// - Returns: The list of bikes at the station.
     /// - Throws: A `VLSError` if the request fails.
     public func bikes(atStationNumber stationNumber: Int) async throws -> [Bike] {
+        // Kept on v3: the authenticated `BikeService` uses v4 (confirmed against the live
+        // web app), but the anonymous role has not been observed on v4, so this stays v3
+        // until a capture confirms it. The `v4`-only fields on `Bike` decode as nil here.
         let endpoint = Endpoint(
             method: .get,
             path: "contracts/\(contract)/bikes",

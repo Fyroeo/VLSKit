@@ -23,6 +23,10 @@ public enum LoginSessionCleaner {
     /// - Parameter iamBaseURL: The base URL of the Keycloak realm, for example
     ///   `environment.iamBaseURL`. The method matches stored data records by this URL's
     ///   host name.
+    ///
+    /// `@MainActor` because `WKWebsiteDataStore` and its records are main-actor-isolated in
+    /// the current SDK; the only caller (`AuthViewModel.logout`) is already on the main actor.
+    @MainActor
     public static func clearSession(for iamBaseURL: URL) async {
         guard let host = iamBaseURL.host else { return }
         let dataStore = WKWebsiteDataStore.default()
