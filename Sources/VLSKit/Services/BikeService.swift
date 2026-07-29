@@ -20,7 +20,7 @@ public struct BikeService: Sendable {
             method: .get,
             path: "contracts/\(contract)/bikes",
             queryItems: queryItems(["number": number]),
-            headers: ["Accept": "application/vnd.bikes.v3+json"]
+            headers: ["Accept": "application/vnd.bikes.v4+json"]
         )
         return try await httpClient.send(endpoint)
     }
@@ -35,7 +35,7 @@ public struct BikeService: Sendable {
             method: .get,
             path: "contracts/\(contract)/bikes",
             queryItems: queryItems(["stationNumber": stationNumber]),
-            headers: ["Accept": "application/vnd.bikes.v3+json"]
+            headers: ["Accept": "application/vnd.bikes.v4+json"]
         )
         return try await httpClient.send(endpoint)
     }

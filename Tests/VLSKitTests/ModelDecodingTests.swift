@@ -319,6 +319,63 @@ final class PKCETests: XCTestCase {
     }
 }
 
+final class CapturedShapeTests: XCTestCase {
+    /// A `CLOSING`/`WORKS` event as returned by the live `/events` feed.
+    func testEventDecodesTypedContentAndStation() throws {
+        let json = """
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "type": "CLOSING", "nature": "WORKS",
+          "startDate": "2026-06-23", "endDate": "2026-11-30",
+          "stations": [{ "code": "abc", "label": "10122 - VERDUN / DESGRAND" }],
+          "content": { "language": "fr", "title": "Fermeture", "description": "Travaux T9" }
+        }
+        """
+        let event = try JSONDecoder.vls.decode(DisplayableEvent.self, from: Data(json.utf8))
+        XCTAssertEqual(event.content?.title, "Fermeture")
+        XCTAssertEqual(event.content?.description, "Travaux T9")
+        XCTAssertEqual(event.stations.first?.stationNumber, 10122)
+    }
+
+    /// A shape the feed did not send must not drop the event.
+    func testEventToleratesUnexpectedContentShape() throws {
+        let json = """
+        { "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "type": "X", "nature": "Y",
+          "stations": "not-an-array", "content": ["also", "wrong"] }
+        """
+        let event = try JSONDecoder.vls.decode(DisplayableEvent.self, from: Data(json.utf8))
+        XCTAssertTrue(event.stations.isEmpty)
+        XCTAssertNil(event.content)
+    }
+
+    func testAccountAlertDecodesBlockingStatus() throws {
+        let json = """
+        [{ "value": "NO_VALID_SUBSCRIPTIONS", "key": "k", "isBlockingStatus": true, "blockingStatus": true }]
+        """
+        let alerts = try JSONDecoder.vls.decode([Alert].self, from: Data(json.utf8))
+        XCTAssertEqual(alerts.first?.value, "NO_VALID_SUBSCRIPTIONS")
+        XCTAssertTrue(alerts.first?.isBlocking ?? false)
+    }
+
+    /// The `v4` bike payload carries reservation and service-history fields absent from `v3`.
+    func testBikeDecodesV4Fields() throws {
+        let json = """
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "number": 26517, "contractName": "lyon",
+          "type": "MECHANICAL", "frameId": "LP19361040", "stationNumber": 3084, "standNumber": 4,
+          "status": "AVAILABLE", "statusLabel": "Accroché", "hasBattery": false, "hasLock": false,
+          "rating": {}, "checked": false,
+          "createdAt": "2019-12-11T10:29:12.62", "updatedAt": "2026-07-27T20:50:05.039536333",
+          "isReserved": false, "energySource": 0, "lastTripDateTime": "2026-07-27T20:44:01"
+        }
+        """
+        let bike = try JSONDecoder.vls.decode(Bike.self, from: Data(json.utf8))
+        XCTAssertEqual(bike.isReserved, false)
+        XCTAssertEqual(bike.energySource, 0)
+        XCTAssertNotNil(bike.lastTripDateTime)
+    }
+}
+
 final class AuthorizationRequestTests: XCTestCase {
     func testExtractCodeFromMatchingRedirect() {
         let redirectURI = URL(string: "https://velov.grandlyon.com/")!
