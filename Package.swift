@@ -6,6 +6,7 @@ let package = Package(
     platforms: [
         .iOS(.v15),
         .macOS(.v12),
+        .watchOS(.v9),
     ],
     products: [
         .library(name: "VLSKit", targets: ["VLSKit"]),
